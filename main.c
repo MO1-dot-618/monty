@@ -1,36 +1,20 @@
 #include "monty.h"
 
-int main(int argc, char **argv)
+int rmonty(FILE *file);
+stack_t *init_stack(int n, stack_t *prev, stack_t *next);
+
+int rmonty(FILE *file)
 {
 	char* line;
 	char* opcode;
-	FILE *file;
-	int i = 0, j = 0, line_num = 1;
-	stack_t *stack_head;
-
-	if (argc != 2)
-	{
-		printf("USAGE: monty file\n");
-		exit(EXIT_FAILURE);
-	}
-
-	file = fopen(argv[1], "r");
-	if (file == NULL)
-	{
-		printf("Error: Can't open file %s\n", argv[1]);
-		exit(EXIT_FAILURE);
-	}
-
-	/* initialize stack and list of opcodes */
-	stack_head = (stack_t*) malloc(sizeof(stack_t));
-	stack_head->prev = NULL;
-	stack_head->next = NULL;
+	int i = 0, j = 0, line_num = 0;
+	stack_t *stack_head = init_stack(0, NULL, NULL);
 
 	line = malloc(100);
 	if (line == NULL)
 	{
 		printf("Error: malloc failed\n");
-		exit(EXIT_FAILURE);
+		return(EXIT_FAILURE);
 	}
 	while (fgets(line, 100, file) != NULL)
 	{
@@ -55,13 +39,46 @@ int main(int argc, char **argv)
 			free(opcode);
 			free(line);
 			fclose(file);
-			exit(EXIT_FAILURE);
+			return(EXIT_FAILURE);
 		}
 		free(opcode);
 		free(line);
 		line = malloc(100);
 	}
 	free(line);
+	return(0);
+}
+
+stack_t *init_stack(int n, stack_t *prev, stack_t *next)
+{
+	stack_t *stack_head = (stack_t*) malloc(sizeof(stack_t));
+	stack_head->prev = prev;
+	stack_head->next = next;
+	stack_head->n = n;
+
+	return stack_head;
+}
+
+int main(int argc, char **argv)
+{
+	FILE *file;
+	int return_;
+
+	if (argc != 2)
+	{
+		printf("USAGE: monty file\n");
+		exit(EXIT_FAILURE);
+	}
+
+	file = fopen(argv[1], "r");
+	if (file == NULL)
+	{
+		printf("Error: Can't open file %s\n", argv[1]);
+		exit(EXIT_FAILURE);
+	}
+
+	return_ = rmonty(file);
+
 	fclose(file);
-	return 0;
+	return (return_);
 }
