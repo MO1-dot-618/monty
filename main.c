@@ -1,14 +1,64 @@
 #include "monty.h"
 
 int rmonty(FILE *file);
-stack_t *init_stack(int n, stack_t *prev, stack_t *next);
+void free_stack(stack_t *head);
+int push(stack_t **head, int n);
+void pall(stack_t *head);
+
+void pall(stack_t *head)
+{
+	stack_t *temp = head;
+
+	while(temp->next)
+		temp = temp->next;
+
+	while (temp)
+	{
+		printf("%d\n", temp->n);
+		temp = temp->prev;
+	}
+}
+void free_stack(stack_t *head)
+{
+	stack_t *temp;
+
+	while (head)
+	{
+		temp = head;
+		head = head->next;
+		free(temp);
+	}
+}
+
+int push(stack_t **head, int n)
+{
+	stack_t *new = (stack_t*) malloc(sizeof(stack_t));
+	stack_t *temp;
+
+	new->n = n;
+	new->next = NULL;
+	if (!*head)
+	{
+		new->prev = NULL;
+		*head = new;
+	}
+	else
+	{
+		temp = *head;
+		while (temp->next)
+			temp = temp->next;
+		temp->next = new;
+		new->prev = temp;
+	}
+	return(0);
+}
 
 int rmonty(FILE *file)
 {
-	char* line;
-	char* opcode;
+	char *line;
+	char *opcode, *num_push;
 	int i = 0, j = 0, line_num = 0;
-	stack_t *stack_head = init_stack(0, NULL, NULL);
+	stack_t *stack_head = NULL;
 
 	line = malloc(100);
 	if (line == NULL)
@@ -30,15 +80,28 @@ int rmonty(FILE *file)
 			opcode[j++] = line[i++];
 		opcode[j] = '\0';
 		if(strcmp(opcode, "push") == 0)
-			printf("you wanna push\n"); /* write code to run opcode */
+		{
+			num_push = malloc(10);
+			j = 0;
+			while (line[i] >= '9' || line[i] <= '0')
+				i++;
+			while (line[i] != '\0' && line[i] != ' ' && line[i] != '\n' && line[i] <= '9' && line[i] >= '0')
+				num_push[j++] = line[i++];
+			num_push[j] = '\0';
+			if (num_push[0] != '\0')
+				push(&stack_head, atoi(num_push));
+			free(num_push);
+		}
 		else if(strcmp(opcode, "pall") == 0)
-			printf("you wanna print\n"); /* write code to run opcode */
+		{
+			pall(stack_head);
+		}
 		else
 		{
 			printf("L%d: unknown instruction %s\n", line_num, opcode);
 			free(opcode);
 			free(line);
-			fclose(file);
+			free_stack(stack_head);
 			return(EXIT_FAILURE);
 		}
 		free(opcode);
@@ -46,17 +109,8 @@ int rmonty(FILE *file)
 		line = malloc(100);
 	}
 	free(line);
+	free_stack(stack_head);
 	return(0);
-}
-
-stack_t *init_stack(int n, stack_t *prev, stack_t *next)
-{
-	stack_t *stack_head = (stack_t*) malloc(sizeof(stack_t));
-	stack_head->prev = prev;
-	stack_head->next = next;
-	stack_head->n = n;
-
-	return stack_head;
 }
 
 int main(int argc, char **argv)
