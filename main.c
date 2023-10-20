@@ -90,6 +90,8 @@ int rmonty(FILE *file)
 			num_push[j] = '\0';
 			if (num_push[0] != '\0')
 				push(&stack_head, atoi(num_push));
+			else
+				fprintf(stderr, "L%d: usage: push integer\n", line_num);
 			free(num_push);
 		}
 		else if(strcmp(opcode, "pall") == 0)
