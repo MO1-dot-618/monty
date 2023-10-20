@@ -4,6 +4,30 @@ int rmonty(FILE *file);
 void free_stack(stack_t *head);
 int push(stack_t **head, int n);
 void pall(stack_t *head);
+int pop(stack_t *head);
+int pint(stack_t *head);
+
+int pint(stack_t *head)
+{
+	stack_t *temp = head;
+
+	while(temp->next)
+		temp = temp->next;
+	printf("%d\n", temp->n);
+	return(0);
+}
+
+int pop(stack_t *head)
+{
+	stack_t *temp = head;
+
+	while(temp->next)
+		temp = temp->next;
+	temp->prev->next = NULL;
+	free(temp);
+	return(0);
+}
+
 
 void pall(stack_t *head)
 {
@@ -98,6 +122,12 @@ int rmonty(FILE *file)
 		{
 			pall(stack_head);
 		}
+		else if(strcmp(opcode, "nop") == 0)
+			continue;
+		else if(strcmp(opcode, "pop") == 0)
+			pop(stack_head);
+		else if(strcmp(opcode, "pint") == 0)
+			pint(stack_head);
 		else
 		{
 			fprintf(stderr, "L%d: unknown instruction %s\n", line_num, opcode);
